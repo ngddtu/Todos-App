@@ -1,0 +1,60 @@
+16/11
+    - 422: dữ liệu đúng request format nhưng không hợp lệ về nội dung → phù hợp cho validation form
+
+17/11
+    Các bước tạo JWT
+    1. Cài pagkage JWT
+        => composer require tymon/jwt-auth 
+
+    2. Sau đó publish và tạo secret
+        php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
+        php artisan jwt:secret
+    Lệnh php artisan jwt:secret sẽ đặt JWT_SECRET vào .env.
+    
+    3.  Cấu hình auth guard 
+            'guards' => [
+                'web' => [
+                    'driver' => 'session',
+                    'provider' => 'users',
+                ],
+
+                'api' => [
+                    'driver' => 'jwt',
+                    'provider' => 'users',
+                ],
+            ],
+    4. Setup file api.js
+        import axios from 'axios';
+
+        const api = axios.create({
+        baseURL: import.meta.env.VITE_API_URL,
+        });
+
+        // Thêm interceptor để gửi token
+        api.interceptors.request.use(config => {
+        const token = localStorage.getItem('jwt_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+        });
+
+        export default api;
+
+    5. Thêm hàm respondWithToken
+        protected function respondWithToken($token)
+        {
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => auth('api')->factory()->getTTL() * 60
+            ]);
+        }
+
+18/11
+    $request->session()->regenerate();
+        Khi người dùng login, Laravel sẽ tạo một session ID mới.
+
+        Session ID này được lưu trong cookie (laravel_session) gửi về trình duyệt.
+
+        Cookie này sẽ được gửi kèm trong các request tiếp theo để backend biết ai đang gửi request.
