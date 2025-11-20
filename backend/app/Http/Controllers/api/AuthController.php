@@ -18,10 +18,16 @@ class AuthController extends Controller
 {
     protected function respondWithToken($token)
     {
+        $user = auth('api')->user();
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email
+            ]
         ]);
     }
     // public function login(Request $request)
@@ -103,6 +109,29 @@ class AuthController extends Controller
         'user'    => $user
     ], 201);
 }
+
+    /**
+     * Get the authenticated User.
+     */
+    public function me()
+    {
+        return response()->json([
+            'user' => auth('api')->user()
+        ]);
+    }
+
+    /**
+     * Log the user out (Invalidate the token).
+     */
+    public function logout()
+    {
+        auth('api')->logout();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đăng xuất thành công'
+        ]);
+    }
 
 
 }

@@ -9,7 +9,11 @@ use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/todos', [TodoController::class , 'index']);
-
-//thêm todos
-Route::post('/todos/store', [TodoController::class, 'store']);
+Route::middleware('auth:api')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/todos', [TodoController::class , 'index']);
+    Route::post('/todos/store', [TodoController::class, 'store']);
+    Route::put('/todos/{todo}', [TodoController::class, 'update']);
+    Route::delete('/todos/{todo}', [TodoController::class, 'destroy']);
+});
